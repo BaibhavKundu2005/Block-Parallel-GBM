@@ -1,0 +1,4 @@
+Config,Budget (s),Time used (s),Trees built,Best val AUC,AUC gap
+"Baseline (B=1, col=1.0)",2265.1,2265.1,400,0.8698,0.0
+"Block B=2, col=0.5",2265.1,2249.7,806,0.86962,0.00018
+"Block B=3, col=0.5",2265.1,2253.8,864,0.86449,0.00532

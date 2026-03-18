@@ -1,0 +1,5 @@
+Config,Block_size,Colsample,Trees,Total_time_s,Best_val_AUC,Speedup,AUC_gap
+"Baseline (B=1, col=1.0)",1,1.0,200,7.6,0.91676,1.00x,0.0
+"Colsample only (B=1, col=0.5)",1,0.5,200,4.2,0.916,1.81x,0.00076
+"Block only (B=2, col=1.0)",2,1.0,200,15.0,0.91044,0.51x,0.00632
+"Both (B=2, col=0.5)",2,0.5,200,13.6,0.9108,0.56x,0.00596
