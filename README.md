@@ -52,7 +52,7 @@ supplemental/
 ├── code/
 │   ├── block_parallel_gbm.py              # Core model implementation
 │   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
-│   ├── porto_experiments.py               # IEEE-CIS experiments
+│   ├── ieee_experiments.py               # IEEE-CIS experiments
 │   ├── santander_multiseed.py             # Multi-seed stability analysis
 │   ├── figure2_block_sweep.py             # Figure 2 generation
 │   ├── figure3_equal_budget.py            # Figure 3 generation
@@ -171,12 +171,12 @@ dataset needed.
 
 1. Create a Kaggle notebook
 2. Add the IEEE-CIS dataset as input (transaction table only)
-3. Upload `porto_experiments.py`
+3. Upload `ieee_experiments.py`
 4. Run — outputs saved to `/kaggle/working/`
 
-**Note:** The script is named `porto_experiments.py` for historical reasons
+**Note:** The script is named `ieee_experiments.py` for historical reasons
 from the development process but runs on the IEEE-CIS dataset.
-Set `DATA_PATH = "/kaggle/input/ieee-fraud-detection/train_transaction.csv"`
+Set `DATA_PATH = "/kaggle/input/competitions/ieee-fraud-detection/train_transaction.csv"`
 at the top of the script.
 
 **Estimated runtime:** ~4 hours total.
