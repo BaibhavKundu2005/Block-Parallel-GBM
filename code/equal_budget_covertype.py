@@ -60,6 +60,86 @@ def fit_single_tree(X, residuals, max_features, max_depth, min_samples_leaf, see
     tree.fit(X, residuals)
     return tree
 
+# ═════════════════════════════════════════════════════════════════
+#  Pre-flight profiler
+# ═════════════════════════════════════════════════════════════════
+
+def preflight_profiler(
+    X_tr,
+    y_tr,
+    max_features=0.5,
+    max_depth=4,
+    min_samples_leaf=20,
+    n_trees=3,
+    label="EXPERIMENT"
+):
+    """
+    Lightweight runtime profiler.
+
+    Estimates:
+        tau_tree
+        rho = tau_overhead / tau_tree
+
+    Prints a recommendation only.
+    Does NOT abort execution.
+    """
+
+    print(f"\n{'='*65}")
+    print(f"PRE-FLIGHT PROFILER — {label}")
+    print(f"{'='*65}")
+
+    times = []
+
+    residuals = y_tr.astype(np.float64)
+
+    print(f"Fitting {n_trees} trees to estimate tau_tree ...")
+
+    for i in range(n_trees):
+
+        t0 = time.perf_counter()
+
+        fit_single_tree(
+            X_tr,
+            residuals,
+            max_features=max_features,
+            max_depth=max_depth,
+            min_samples_leaf=min_samples_leaf,
+            seed=42 + i
+        )
+
+        elapsed = time.perf_counter() - t0
+
+        times.append(elapsed)
+
+        print(f"  Tree {i+1}: {elapsed:.2f}s")
+
+    tau_tree = np.mean(times)
+
+    # Conservative fixed estimate for Kaggle free-tier CPUs
+    tau_overhead = 0.3
+
+    rho = tau_overhead / tau_tree
+
+    print(f"\n  Average tau_tree   = {tau_tree:.2f}s")
+    print(f"  tau_overhead       = {tau_overhead:.1f}s  (fixed, 4 cores)")
+    print(f"  Overhead ratio rho = {rho:.3f}")
+
+    if rho < 0.1:
+        recommendation = "STRONG GO — rho << 0.1."
+    elif rho < 1.0:
+        recommendation = "GO — useful parallelism expected."
+    else:
+        recommendation = "NO-GO — overhead may dominate compute."
+
+    print(f"\n  Recommendation: {recommendation}")
+
+    if rho >= 1.0:
+        print("\nWARNING:")
+        print("  rho >= 1.0 → process overhead may dominate useful work.")
+        print("  Continuing anyway because this is only a recommendation.")
+
+    print(f"{'='*65}")
+
 class BlockParallelGBM:
     def __init__(self, n_estimators=10_000, block_size=1, learning_rate=0.1,
                  max_depth=4, min_samples_leaf=20, colsample=1.0,
@@ -326,6 +406,7 @@ def plot_equal_budget(baseline, b2, budget):
 
 if __name__ == "__main__":
     X_tr, X_val, y_tr, y_val = load_covertype(n_samples=100_000)
+    preflight_profiler(X_tr, y_tr, max_features=0.5, max_depth=4, min_samples_leaf=20, label="Covertype equal-budget experiment")
     baseline, b2, budget = run_equal_budget(X_tr, y_tr, X_val, y_val)
     df = summarise(baseline, b2, budget)
     plot_equal_budget(baseline, b2, budget)
