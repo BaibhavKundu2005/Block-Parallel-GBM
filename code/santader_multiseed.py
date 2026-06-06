@@ -4,10 +4,7 @@ Santander — Multi-Seed Equal-Budget Reruns
 Runs the equal-budget experiment on Santander across 4 random seeds
 to establish mean and standard deviation for the headline claim.
 
-Seed 42 result is already known:
-    Baseline AUC = 0.80692  |  B=2 AUC = 0.84107  |  gap = -0.03415
-
-This script runs seeds 123, 456, 789 fresh and produces a summary
+This script runs seeds 42, 123, 456, 789 fresh and produces a summary
 table with mean ± std across all 4 seeds.
 
 Each seed:
@@ -15,10 +12,8 @@ Each seed:
     2. Fit B=2 live (col=0.5, time_limit=T)   → records best_val_auc
 
 Nothing from previous experiments is reused — fresh fits only.
-Seed 42 numbers are hardcoded from previous run and included in
-the final summary table without refitting.
-
 Outputs (saved to /kaggle/working/):
+    santander_seed_42_equal_budget.csv
     santander_seed_123_equal_budget.csv
     santander_seed_456_equal_budget.csv
     santander_seed_789_equal_budget.csv
@@ -27,9 +22,9 @@ Outputs (saved to /kaggle/working/):
 
 Runtime estimate (tau_tree ~24s per tree):
     Per seed: baseline ~400x24 = ~2.7 hrs + b2_live ~2.7 hrs = ~5.4 hrs
-    3 seeds total = ~16 hrs
-    Run across 2 Kaggle sessions (seeds 123+456 in session 1,
-    seed 789 in session 2), or run one seed per session.
+    5 seeds total = ~21 hrs
+    Run across 2 Kaggle sessions (seeds 42+123 in session 1,
+    seed 456+789 in session 2), or run one seed per session.
 
     To run a single seed only, set SEEDS = [123] at the top.
 """
@@ -53,24 +48,10 @@ DATA_PATH = "/kaggle/input/santander-customer-transaction-prediction/train.csv"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # ── Configure which seeds to run in this session ──────────────────
-# Change this to [123], [456], or [789] to run one seed per session.
-# Run all three across sessions then combine using the summary at the end.
-SEEDS        = [123, 456, 789]
+# Change this to [42], [123], [456], or [789] to run one seed per session.
+# Run all four across sessions then combine using the summary at the end.
+SEEDS        = [42, 123, 456, 789]
 N_ESTIMATORS = 400
-
-# ── Seed 42 result from previous run — hardcoded, no refit ───────
-SEED_42_RESULT = {
-    "seed":           42,
-    "baseline_time":  9528.1,
-    "baseline_trees": 400,
-    "baseline_auc":   0.80692,
-    "b2_time":        9501.3,
-    "b2_trees":       1724,
-    "b2_auc":         0.84107,
-    "auc_gap":        -0.03415,
-    "trees_ratio":    4.31,
-}
-
 
 # ─────────────────────────────────────────────────────────────────
 #  Core model
@@ -89,6 +70,86 @@ def fit_single_tree(X, residuals, max_features, max_depth,
     )
     tree.fit(X, residuals)
     return tree
+
+# ═════════════════════════════════════════════════════════════════
+#  Pre-flight profiler
+# ═════════════════════════════════════════════════════════════════
+
+def preflight_profiler(
+    X_tr,
+    y_tr,
+    max_features=0.5,
+    max_depth=4,
+    min_samples_leaf=20,
+    n_trees=3,
+    label="EXPERIMENT"
+):
+    """
+    Lightweight runtime profiler.
+
+    Estimates:
+        tau_tree
+        rho = tau_overhead / tau_tree
+
+    Prints a recommendation only.
+    Does NOT abort execution.
+    """
+
+    print(f"\n{'='*65}")
+    print(f"PRE-FLIGHT PROFILER — {label}")
+    print(f"{'='*65}")
+
+    times = []
+
+    residuals = y_tr.astype(np.float64)
+
+    print(f"Fitting {n_trees} trees to estimate tau_tree ...")
+
+    for i in range(n_trees):
+
+        t0 = time.perf_counter()
+
+        fit_single_tree(
+            X_tr,
+            residuals,
+            max_features=max_features,
+            max_depth=max_depth,
+            min_samples_leaf=min_samples_leaf,
+            seed=42 + i
+        )
+
+        elapsed = time.perf_counter() - t0
+
+        times.append(elapsed)
+
+        print(f"  Tree {i+1}: {elapsed:.2f}s")
+
+    tau_tree = np.mean(times)
+
+    # Conservative fixed estimate for Kaggle free-tier CPUs
+    tau_overhead = 0.3
+
+    rho = tau_overhead / tau_tree
+
+    print(f"\n  Average tau_tree   = {tau_tree:.2f}s")
+    print(f"  tau_overhead       = {tau_overhead:.1f}s  (fixed, 4 cores)")
+    print(f"  Overhead ratio rho = {rho:.3f}")
+
+    if rho < 0.1:
+        recommendation = "STRONG GO — rho << 0.1."
+    elif rho < 1.0:
+        recommendation = "GO — useful parallelism expected."
+    else:
+        recommendation = "NO-GO — overhead may dominate compute."
+
+    print(f"\n  Recommendation: {recommendation}")
+
+    if rho >= 1.0:
+        print("\nWARNING:")
+        print("  rho >= 1.0 → process overhead may dominate useful work.")
+        print("  Continuing anyway because this is only a recommendation.")
+
+    print(f"{'='*65}")
 
 
 class BlockParallelGBM:
@@ -257,6 +318,8 @@ def run_seed(seed, path):
     print(SEP)
 
     X_tr, X_val, y_tr, y_val = load_santander(path, seed)
+
+    preflight_profiler( X_tr, y_tr, max_features=0.5, max_depth=4, min_samples_leaf=20, label="Santander multi-seed equal-budget")
 
     # ── Baseline ─────────────────────────────────────────────────
     print("\n[baseline] B=1, col=1.0, n_estimators=" + str(N_ESTIMATORS))
@@ -427,10 +490,9 @@ def plot_seed(baseline, b2, budget, seed, auc_gap, trees_ratio):
 
 def summarise_all_seeds(results):
     """
-    Combines seed 42 (hardcoded) with fresh results.
     Prints mean +- std for the headline AUC gap claim.
     """
-    all_results = [SEED_42_RESULT] + results
+    all_results = results
 
     SEP = "=" * 65
     print("\n" + SEP)
@@ -485,7 +547,7 @@ def summarise_all_seeds(results):
 
 
 def plot_multiseed_summary(results):
-    all_results = [SEED_42_RESULT] + results
+    all_results = results
     seeds       = [r["seed"] for r in all_results]
     gaps        = [-r["auc_gap"] for r in all_results]  # positive = B=2 wins
     baseline_aucs = [r["baseline_auc"] for r in all_results]
@@ -568,7 +630,6 @@ def run_all():
     print(SEP)
     print("SANTANDER MULTI-SEED EQUAL-BUDGET RERUNS")
     print("Seeds to run this session: " + str(SEEDS))
-    print("Seed 42 result hardcoded from previous run (no refit)")
     print("Est. time per seed: ~5.4 hrs | Total: ~" +
           str(len(SEEDS) * 5.4) + " hrs")
     print(SEP)
@@ -579,7 +640,7 @@ def run_all():
         results.append(result)
         # Save intermediate summary after each seed
         # in case session times out before all seeds finish
-        interim_df = pd.DataFrame([SEED_42_RESULT] + results)
+        interim_df = pd.DataFrame(results)
         interim_df.to_csv(
             OUT_DIR + "santander_multiseed_interim.csv",
             index=False
