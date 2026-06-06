@@ -1,11 +1,5 @@
 # Block-Synchronous Gradient Boosting — Supplemental Material
 
-Supplemental code and results for the paper:
-
-> **Block-Synchronous Gradient Boosting: Characterising Across-Iteration
-> Parallelism on Multi-Core CPUs**
-> Anonymous submission — AutoML 2026
-
 ---
 
 ## Overview
