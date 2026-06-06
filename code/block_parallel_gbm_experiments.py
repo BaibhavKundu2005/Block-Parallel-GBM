@@ -1,6 +1,15 @@
 """
 Block Parallel GBM — Full Research Experiment Suite
 =====================================================
+All experiments are recomputed from scratch by default.
+
+Optional stub restoration utilities are included only for:
+- interrupted-run recovery,
+- developer convenience,
+- rapid plotting iteration.
+
+The default execution path performs full retraining.
+
 Workflow summary:
 
   PRECOMPUTED (restored as stubs, no retraining):
@@ -12,6 +21,15 @@ Workflow summary:
   FRESHLY TRAINED on Santander:
     b3  (B=3, col=0.5)  400 trees  ~0.52 hrs
     b4  (B=4, col=0.5)  400 trees  ~0.43 hrs
+
+   All experiments are recomputed from scratch by default.
+
+Optional stub restoration utilities are included only for:
+- interrupted-run recovery,
+- developer convenience,
+- rapid plotting iteration.
+
+The default execution path performs full retraining.
 
   EXPERIMENTS (Santander):
     Exp 1 — Ablation        : baseline, col_only, block_only, b2  (stubs only)
@@ -292,6 +310,9 @@ class BlockParallelGBM:
 # ═════════════════════════════════════════════════════════════════
 #  Stub model — restores a previously-trained config from saved numbers
 # ═════════════════════════════════════════════════════════════════
+# OPTIONAL developer utility:
+# Restores previously completed runs without retraining.
+# NOT used in the default reproducibility pipeline.
 
 def make_stub_model(block_size, colsample, auto_scale_lr, learning_rate,
                     total_time, val_auc_final, n_trees, label):
@@ -719,8 +740,8 @@ def load_adult():
 def run_all(santander_path, n_estimators=400, precomputed=None):
     """
     Full pipeline:
-      1. Restore precomputed configs as stubs (instant)
-      2. Train b3 and b4 fresh on Santander
+      1. Optionally restore precomputed configs as stubs (developer mode only)
+      2. Train remaining configs fresh
       3. Run Experiments 1, 2, 4 from cache
       4. Run Experiment 3 (equal budget live) for b2 and b3
       5. Run all experiments on UCI Adult (fresh training, ~4 min)
@@ -792,4 +813,4 @@ if __name__ == "__main__":
         "b2":         {"total_time": 2452.5, "val_auc_final": 0.77434, "n_trees": 400},
     }
 
-    run_all(SANTANDER_PATH, n_estimators=N_ESTIMATORS, precomputed=PRECOMPUTED)
+    run_all(SANTANDER_PATH, n_estimators=N_ESTIMATORS, precomputed=None)
