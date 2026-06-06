@@ -178,6 +178,79 @@ def load_covertype(n_samples=100_000, random_state=42):
 
 
 # ─────────────────────────────────────────────────────────────────
+#  Pre-flight profiler
+# ─────────────────────────────────────────────────────────────────
+
+def preflight_profiler(X_tr, y_tr, n_trees=3):
+    """
+    Estimates per-tree training cost and overhead ratio rho.
+
+    rho = tau_overhead / tau_tree
+
+    If rho >= 1.0:
+        parallelism overhead dominates useful work
+        → abort expensive experiment runs
+    """
+
+    print(f"\n{'='*65}")
+    print("PRE-FLIGHT: PER-TREE COST PROFILING")
+    print(f"{'='*65}")
+
+    times = []
+
+    residuals = y_tr.astype(np.float64)
+
+    print(f"Fitting {n_trees} trees to estimate tau_tree ...")
+
+    for i in range(n_trees):
+
+        t0 = time.perf_counter()
+
+        fit_single_tree(
+            X_tr,
+            residuals,
+            max_features=0.5,
+            max_depth=4,
+            min_samples_leaf=20,
+            seed=42 + i
+        )
+
+        elapsed = time.perf_counter() - t0
+
+        times.append(elapsed)
+
+        print(f"  Tree {i+1}: {elapsed:.2f}s")
+
+    tau_tree = np.mean(times)
+
+    # Conservative fixed estimate for process-launch overhead
+    tau_overhead = 0.3
+
+    rho = tau_overhead / tau_tree
+
+    print(f"\n  Average tau_tree   = {tau_tree:.2f}s")
+    print(f"  tau_overhead       = {tau_overhead:.1f}s  (fixed, 4 cores)")
+    print(f"  Overhead ratio rho = {rho:.3f}")
+
+    if rho < 0.1:
+        recommendation = "STRONG GO — rho << 0.1."
+    elif rho < 1.0:
+        recommendation = "GO — useful parallelism expected."
+    else:
+        recommendation = "NO-GO — overhead dominates compute."
+
+    print(f"\n  Recommendation: {recommendation}")
+
+    if rho >= 1.0:
+        raise RuntimeError(
+            "Pre-flight abort: rho >= 1.0 "
+            "(parallel overhead dominates useful work)."
+        )
+
+    print(f"{'='*65}")
+
+
+# ─────────────────────────────────────────────────────────────────
 #  Ablation
 # ─────────────────────────────────────────────────────────────────
 
@@ -343,6 +416,7 @@ def plot_ablation(models, df):
 
 if __name__ == "__main__":
     X_tr, X_val, y_tr, y_val = load_covertype(n_samples=100_000)
+    preflight_profiler(X_tr, y_tr)
     models = run_ablation(X_tr, y_tr, X_val, y_val, n_estimators=300)
     df     = build_table(models)
     plot_ablation(models, df)
