@@ -46,13 +46,14 @@ supplemental/
 ├── code/
 │   ├── block_parallel_gbm_kaggle.py              # Core model implementation
 │   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
-│   ├── ieee_experiments.py               # IEEE-CIS experiments
+│   ├── ieee_experiments.py                # IEEE-CIS experiments
 │   ├── santander_multiseed.py             # Multi-seed stability analysis
 │   ├── figure2_block_sweep.py             # Figure 2 generation
 │   ├── figure3_equal_budget.py            # Figure 3 generation
 │   ├── fig1_hparam_sensitivity.py         # Figure 1 generation
 │   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
-│   └── generate_result_csvs.py            # Reconstruct CSVs from raw numbers
+    ├── ablation_covertype.py              # Covertype - ablation
+│   └── additional_experiments.py           
 │
 └── results/
     ├── cpu_usage_images/
