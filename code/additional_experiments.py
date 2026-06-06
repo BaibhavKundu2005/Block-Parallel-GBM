@@ -186,6 +186,77 @@ class BlockParallelGBM:
     def best_val_auc(self):
         return max(self.val_auc_) if self.val_auc_ else None
 
+# ─────────────────────────────────────────────────────────────────
+#  Pre-flight profiler
+# ─────────────────────────────────────────────────────────────────
+
+def preflight_profiler(X_tr, y_tr, n_trees=3):
+    """
+    Estimates per-tree training cost and overhead ratio rho.
+
+    rho = tau_overhead / tau_tree
+
+    If rho >= 1.0:
+        parallelism overhead dominates useful work
+    """
+
+    print(f"\n{'='*65}")
+    print("PRE-FLIGHT: PER-TREE COST PROFILING")
+    print(f"{'='*65}")
+
+    times = []
+
+    residuals = y_tr.astype(np.float64)
+
+    print(f"Fitting {n_trees} trees to estimate tau_tree ...")
+
+    for i in range(n_trees):
+
+        t0 = time.perf_counter()
+
+        fit_single_tree(
+            X_tr,
+            residuals,
+            max_features=0.5,
+            max_depth=4,
+            min_samples_leaf=20,
+            seed=42 + i
+        )
+
+        elapsed = time.perf_counter() - t0
+
+        times.append(elapsed)
+
+        print(f"  Tree {i+1}: {elapsed:.2f}s")
+
+    tau_tree = np.mean(times)
+
+    # Conservative fixed estimate for process-launch overhead
+    tau_overhead = 0.3
+
+    rho = tau_overhead / tau_tree
+
+    print(f"\n  Average tau_tree   = {tau_tree:.2f}s")
+    print(f"  tau_overhead       = {tau_overhead:.1f}s  (fixed, 4 cores)")
+    print(f"  Overhead ratio rho = {rho:.3f}")
+
+    if rho < 0.1:
+        recommendation = "STRONG GO — rho << 0.1."
+    elif rho < 1.0:
+        recommendation = "GO — useful parallelism expected."
+    else:
+        recommendation = "NO-GO — overhead dominates compute."
+
+    print(f"\n  Recommendation: {recommendation}")
+
+    if rho >= 1.0:
+        print("\nWARNING:")
+        print("  rho >= 1.0 → overhead may dominate useful work.")
+        print("  Continuing anyway because this is only a recommendation.")
+
+    print(f"{'='*65}")
+
+
 
 # ═════════════════════════════════════════════════════════════════
 #  PART 1 — XGBoost / LightGBM comparison on Santander
@@ -239,6 +310,7 @@ def fit_xgb_lgbm_santander(santander_path):
     X_tr, X_val, y_tr, y_val = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y)
     print(f"  Train: {X_tr.shape} | Val: {X_val.shape}")
+    preflight_profiler(X_tr, y_tr, max_features=1.0, max_depth=4, min_samples_leaf=20, label="Santander XGB/LGB comparison")
 
     N_ROUNDS = 400
     LR       = 0.1
@@ -694,6 +766,7 @@ def run_all(santander_path, n_estimators_covertype=200):
 
     # ── Part 2: Covertype ──
     X_tr, X_val, y_tr, y_val = load_covertype(n_samples=100_000)
+    preflight_profiler(X_tr, y_tr, max_features=0.5, max_depth=4, min_samples_leaf=20, label="Covertype hyperparameter sensitivity")
 
     # Hyperparameter sensitivity
     hparam_df = run_hparam_sensitivity(
