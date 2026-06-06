@@ -135,8 +135,7 @@ equal budget in session 2.
 
 1. Upload `santander_multiseed.py`
 2. Set `SEEDS = [123]` at the top to run one seed per session
-3. Run three separate sessions for seeds 123, 456, 789
-4. Seed 42 result is hardcoded from the main experiment run
+3. Run four separate sessions for seeds 42, 123, 456, 789
 
 **Estimated runtime:** ~5.5 hours per seed.
 
