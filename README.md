@@ -85,7 +85,10 @@ corresponding dataset to be added as a Kaggle input dataset before running.
 ### Minimal smoke test (no dataset required, runs in ~30 seconds)
 
 ```python
-from code.block_parallel_gbm import BlockParallelGBM
+import sys
+sys.path.append("code")
+
+from block_parallel_gbm_kaggle import BlockParallelGBM
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 
@@ -98,14 +101,14 @@ baseline = BlockParallelGBM(n_estimators=50, block_size=1,
                              colsample=1.0, auto_scale_lr=False,
                              n_jobs=1, random_state=42)
 baseline.fit(X_tr, y_tr, X_val, y_val)
-print(f"Baseline AUC: {baseline.best_val_auc:.5f}")
+print(f"Baseline AUC: {baseline.val_auc_[-1]:.5f}")
 
 # Block-synchronous B=2
 b2 = BlockParallelGBM(n_estimators=50, block_size=2,
                        colsample=0.5, auto_scale_lr=True,
                        n_jobs=-1, random_state=42)
 b2.fit(X_tr, y_tr, X_val, y_val)
-print(f"B=2 AUC:      {b2.best_val_auc:.5f}")
+print(f"B=2 AUC: {b2.val_auc_[-1]:.5f}")
 ```
 
 ---
