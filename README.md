@@ -50,7 +50,7 @@ supplemental/
 ├── requirements.txt
 │
 ├── code/
-│   ├── block_parallel_gbm.py              # Core model implementation
+│   ├── block_parallel_gbm_kaggle.py              # Core model implementation
 │   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
 │   ├── ieee_experiments.py               # IEEE-CIS experiments
 │   ├── santander_multiseed.py             # Multi-seed stability analysis
@@ -241,6 +241,20 @@ python3 code/fig1_hparam_sensitivity.py   # Fig 1 — heatmaps (Appendix C)
 ```
 
 Each script saves both a vector PDF and a 300 DPI PNG to the working directory.
+
+---
+
+## CPU Utilisation Proof
+
+Supplementary evidence demonstrating that:
+
+- Sequential B=1 training saturates one CPU core
+- Block-parallel B=4 training saturates all 4 Kaggle free-tier CPU cores
+- Observed wall-clock speedup: 4.59×
+
+See:
+- `code/cpu_usage.py`
+- `results/cpu_usage_images/`
 
 ---
 
