@@ -57,9 +57,14 @@ supplemental/
 │   ├── figure2_block_sweep.py             # Figure 2 generation
 │   ├── figure3_equal_budget.py            # Figure 3 generation
 │   ├── fig1_hparam_sensitivity.py         # Figure 1 generation
+│   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
 │   └── generate_result_csvs.py            # Reconstruct CSVs from raw numbers
 │
 └── results/
+    ├── cpu_usage_images/
+    │    ├── annotated_1.png
+    │    ├── annotated_2.png
+    │    └── annotated_3.png
     ├── ablation_santander.csv
     ├── block_sweep_santander.csv
     ├── equal_budget_santander.csv
