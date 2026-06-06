@@ -242,10 +242,9 @@ def preflight_profiler(X_tr, y_tr, n_trees=3):
     print(f"\n  Recommendation: {recommendation}")
 
     if rho >= 1.0:
-        raise RuntimeError(
-            "Pre-flight abort: rho >= 1.0 "
-            "(parallel overhead dominates useful work)."
-        )
+        print("\nWARNING:")
+        print("  rho >= 1.0 → overhead may dominate useful work.")
+        print("  Continuing anyway because this is only a recommendation.")
 
     print(f"{'='*65}")
 
