@@ -92,7 +92,7 @@ from block_parallel_gbm_kaggle import BlockParallelGBM
 from sklearn.datasets import make_classification
 from sklearn.model_selection import train_test_split
 
-X, y = make_classification(n_samples=5000, n_features=20, random_state=42)
+X, y = make_classification(n_samples=50000, n_features=50, random_state=42)
 X_tr, X_val, y_tr, y_val = train_test_split(X, y, test_size=0.2,
                                               random_state=42)
 
