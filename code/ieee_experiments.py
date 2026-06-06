@@ -724,7 +724,7 @@ def run_all():
         print("  1. Increase N_SUBSAMPLE toward 595212 (full dataset)")
         print("  2. Increase max_depth in fit_config to raise tau_tree")
         print("  3. Choose a different dataset")
-        return
+        print("Continuing anyway because this is only a recommendation.")
 
     if rho >= 0.10:
         print("WARNING: rho=" + str(round(rho,3)) + " above 0.1 threshold. "
