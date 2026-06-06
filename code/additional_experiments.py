@@ -190,18 +190,27 @@ class BlockParallelGBM:
 #  Pre-flight profiler
 # ─────────────────────────────────────────────────────────────────
 
-def preflight_profiler(X_tr, y_tr, n_trees=3):
+def preflight_profiler(
+    X_tr,
+    y_tr,
+    max_features=0.5,
+    max_depth=4,
+    min_samples_leaf=20,
+    n_trees=3,
+    label="EXPERIMENT"
+):
     """
-    Estimates per-tree training cost and overhead ratio rho.
+    Lightweight pre-flight runtime profiler.
 
-    rho = tau_overhead / tau_tree
+    Estimates:
+        tau_tree
+        rho = tau_overhead / tau_tree
 
-    If rho >= 1.0:
-        parallelism overhead dominates useful work
+    Prints a recommendation but does NOT abort.
     """
 
     print(f"\n{'='*65}")
-    print("PRE-FLIGHT: PER-TREE COST PROFILING")
+    print(f"PRE-FLIGHT PROFILER — {label}")
     print(f"{'='*65}")
 
     times = []
@@ -217,9 +226,9 @@ def preflight_profiler(X_tr, y_tr, n_trees=3):
         fit_single_tree(
             X_tr,
             residuals,
-            max_features=0.5,
-            max_depth=4,
-            min_samples_leaf=20,
+            max_features=max_features,
+            max_depth=max_depth,
+            min_samples_leaf=min_samples_leaf,
             seed=42 + i
         )
 
@@ -231,7 +240,7 @@ def preflight_profiler(X_tr, y_tr, n_trees=3):
 
     tau_tree = np.mean(times)
 
-    # Conservative fixed estimate for process-launch overhead
+    # Conservative process-launch estimate for Kaggle CPUs
     tau_overhead = 0.3
 
     rho = tau_overhead / tau_tree
@@ -245,13 +254,13 @@ def preflight_profiler(X_tr, y_tr, n_trees=3):
     elif rho < 1.0:
         recommendation = "GO — useful parallelism expected."
     else:
-        recommendation = "NO-GO — overhead dominates compute."
+        recommendation = "NO-GO — overhead may dominate compute."
 
     print(f"\n  Recommendation: {recommendation}")
 
     if rho >= 1.0:
         print("\nWARNING:")
-        print("  rho >= 1.0 → overhead may dominate useful work.")
+        print("  rho >= 1.0 → process overhead may dominate useful work.")
         print("  Continuing anyway because this is only a recommendation.")
 
     print(f"{'='*65}")
