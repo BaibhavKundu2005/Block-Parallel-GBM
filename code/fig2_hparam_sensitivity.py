@@ -2,7 +2,6 @@
 Fig. 2 — Hyperparameter Sensitivity Heatmaps (Covertype)
 =========================================================
 Generates:
-    fig2_hparam_sensitivity.emf  — vector, insert into Word
     fig2_hparam_sensitivity.pdf  — vector, for final PDF submission
     fig2_hparam_sensitivity.png  — 300 DPI backup
 
