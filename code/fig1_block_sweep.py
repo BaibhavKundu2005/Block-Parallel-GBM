@@ -2,7 +2,7 @@
 
 
 """
-Figure 2 — Block Sweep Learning Curves
+Figure 1 — Block Sweep Learning Curves
 =======================================
 Val AUC vs wall-clock time for B in {1, 2, 3, 4} at col=0.5
 on Santander (left panel) and Covertype (right panel).
@@ -12,8 +12,8 @@ the stub model approach — log-growth AUC curves anchored at
 known final values, with realistic cumulative timing.
 
 Outputs:
-    figure2_block_sweep.pdf  — vector, for final submission
-    figure2_block_sweep.png  — 300 DPI, for Word editing
+    figure1_block_sweep.pdf  — vector, for final submission
+    figure1_block_sweep.png  — 300 DPI, for Word editing
 """
 
 import numpy as np
@@ -188,8 +188,8 @@ fig.legend(
 #  Save — PDF (vector) and PNG (300 DPI)
 # ─────────────────────────────────────────────────────────────────
 
-pdf_path = OUT_DIR + "figure2_block_sweep.pdf"
-png_path = OUT_DIR + "figure2_block_sweep.png"
+pdf_path = OUT_DIR + "figure1_block_sweep.pdf"
+png_path = OUT_DIR + "figure1_block_sweep.png"
 
 fig.savefig(pdf_path, format="pdf", dpi=300,
             bbox_inches="tight", facecolor="white")
