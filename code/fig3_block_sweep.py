@@ -24,7 +24,7 @@ import matplotlib.ticker as ticker
 from matplotlib.lines import Line2D
 import os
 
-OUT_DIR = "/mnt/user-data/outputs/"
+OUT_DIR = "/kaggle/working/"
 os.makedirs(OUT_DIR, exist_ok=True)
 
 # ─────────────────────────────────────────────────────────────────
