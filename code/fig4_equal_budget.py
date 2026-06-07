@@ -1,5 +1,5 @@
 """
-Figure 3 — Equal-Budget AUC vs Wall-Clock Time
+Figure 4 — Equal-Budget AUC vs Wall-Clock Time
 ===============================================
 Three panels: Santander (left), Covertype (centre), IEEE-CIS (right).
 Each panel shows baseline and B=2 AUC vs wall-clock time with a
@@ -8,8 +8,8 @@ vertical dashed line marking the equal-budget boundary.
 Data reconstructed from confirmed experimental results.
 
 Outputs:
-    figure3_equal_budget.pdf  — vector, for final submission
-    figure3_equal_budget.png  — 300 DPI, for Word editing
+    figure4_equal_budget.pdf  — vector, for final submission
+    figure4_equal_budget.png  — 300 DPI, for Word editing
 """
 
 import numpy as np
@@ -218,8 +218,8 @@ for ax, (name, d) in zip(axes, DATASETS.items()):
 #  Save
 # ─────────────────────────────────────────────────────────────────
 
-pdf_path = OUT_DIR + "figure3_equal_budget.pdf"
-png_path = OUT_DIR + "figure3_equal_budget.png"
+pdf_path = OUT_DIR + "figure4_equal_budget.pdf"
+png_path = OUT_DIR + "figure4_equal_budget.png"
 
 fig.savefig(pdf_path, format="pdf", dpi=300,
             bbox_inches="tight", facecolor="white")
