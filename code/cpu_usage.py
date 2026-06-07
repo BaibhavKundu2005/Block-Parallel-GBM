@@ -151,7 +151,7 @@ open(LOG_FILE, "w").close()
 
 parallel_model = BlockParallelGBM(
     n_estimators=16,
-    block_size=4,
+    block_size=2,
     colsample=0.5,
     auto_scale_lr=True,
     n_jobs=-1,
@@ -159,14 +159,14 @@ parallel_model = BlockParallelGBM(
     verbose=False
 )
 
-print("Training Block Parallel (B=4)")
+print("Training Block Parallel (B=2)")
 t0 = time.perf_counter()
 
 parallel_model.fit(X_tr, y_tr, X_val, y_val)
 
 par_time = time.perf_counter() - t0
 
-summarize_logs("BLOCK-PARALLEL (B=4)")
+summarize_logs("BLOCK-PARALLEL (B=2)")
 
 print(f"\nWall-clock time: {par_time:.3f}s")
 
@@ -185,6 +185,4 @@ print(f"\nSpeedup: {seq_time / par_time:.2f}x")
 
 print("\nInterpretation:")
 print("- B=1 should show exactly one PID")
-print("- B=4 should show multiple worker PIDs")
-print("- Multiple PIDs confirms process-level parallelism")
 print("- Reduced wall-clock time confirms simultaneous execution")
