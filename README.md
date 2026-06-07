@@ -253,7 +253,7 @@ Supplementary evidence demonstrating that:
 
 See:
 - `code/cpu_usage.py`
-- `fig4_cpu_utilization.pn`
+- `fig4_cpu_utilization.png`
 
 ---
 
