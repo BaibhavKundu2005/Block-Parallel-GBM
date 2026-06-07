@@ -1,10 +1,10 @@
 """
-Fig. 1 — Hyperparameter Sensitivity Heatmaps (Covertype)
+Fig. 3 — Hyperparameter Sensitivity Heatmaps (Covertype)
 =========================================================
 Generates:
-    fig1_hparam_sensitivity.emf  — vector, insert into Word
-    fig1_hparam_sensitivity.pdf  — vector, for final PDF submission
-    fig1_hparam_sensitivity.png  — 300 DPI backup
+    fig3_hparam_sensitivity.emf  — vector, insert into Word
+    fig3_hparam_sensitivity.pdf  — vector, for final PDF submission
+    fig3_hparam_sensitivity.png  — 300 DPI backup
 
 Run locally on Windows. Requires matplotlib >= 3.5.
 """
@@ -118,7 +118,7 @@ plt.tight_layout(rect=[0, 0.0, 1, 1])
 # ── Save ──────────────────────────────────────────────────────────
 for ext in ["emf", "pdf", "png"]:
     kw = {"dpi": 300} if ext == "png" else {}
-    path = OUT + "fig1_hparam_sensitivity." + ext
+    path = OUT + "fig3_hparam_sensitivity." + ext
     try:
         plt.savefig(path, format=ext, bbox_inches="tight",
                     facecolor="white", **kw)
