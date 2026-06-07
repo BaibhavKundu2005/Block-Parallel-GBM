@@ -48,18 +48,15 @@ supplemental/
 │   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
 │   ├── ieee_experiments.py                # IEEE-CIS experiments
 │   ├── santander_multiseed.py             # Multi-seed stability analysis
-│   ├── figure2_block_sweep.py             # Figure 2 generation
-│   ├── figure3_equal_budget.py            # Figure 3 generation
-│   ├── fig1_hparam_sensitivity.py         # Figure 1 generation
+│   ├── fig3_block_sweep.py             # Figure 3 generation
+│   ├── fig4_equal_budget.py            # Figure 4 generation
+│   ├── fig2_hparam_sensitivity.py         # Figure 2 generation
 │   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
     ├── ablation_covertype.py              # Covertype - ablation
 │   └── additional_experiments.py           
 │
 └── results/
-    ├── cpu_usage_images/
-    │    ├── annotated_1.png
-    │    ├── annotated_2.png
-    │    └── annotated_3.png
+    ├── fig4_cpu_utilization.png
     ├── ablation_santander.csv
     ├── block_sweep_santander.csv
     ├── equal_budget_santander.csv
@@ -215,19 +212,19 @@ All CSV files in `results/` correspond directly to tables in the paper:
 
 | File | Paper table |
 |---|---|
-| `ablation_santander.csv` | Table 2 (main paper) |
-| `ablation_covertype.csv` | Appendix A |
-| `ablation_adult.csv` | Appendix A |
-| `ablation_ieee_cis.csv` | Appendix A |
-| `block_sweep_santander.csv` | Appendix B |
-| `block_sweep_covertype.csv` | Appendix B |
-| `block_sweep_adult.csv` | Appendix B |
-| `block_sweep_ieee_cis.csv` | Appendix B |
-| `equal_budget_santander.csv` | Table 3 (main paper) |
-| `equal_budget_covertype.csv` | Table 3 (main paper) |
-| `equal_budget_ieee_cis.csv` | Table 3 (main paper) |
-| `hparam_sensitivity_covertype.csv` | Appendix C |
-| `santander_multiseed_summary.csv` | Table 4 (main paper) |
+| `ablation_santander.csv` | Table 2 |
+| `ablation_covertype.csv` | Table 2 |
+| `ablation_adult.csv` | Table 2 |
+| `ablation_ieee_cis.csv` | Table 2 |
+| `block_sweep_santander.csv`
+| `block_sweep_covertype.csv`
+| `block_sweep_adult.csv`
+| `block_sweep_ieee_cis.csv`
+| `equal_budget_santander.csv` | Table 3 |
+| `equal_budget_covertype.csv` | Table 3 |
+| `equal_budget_ieee_cis.csv` | Table 3 |
+| `hparam_sensitivity_covertype.csv`
+| `santander_multiseed_summary.csv` | Table 4 |
 
 ---
 
@@ -237,9 +234,9 @@ All figures can be regenerated from the confirmed result numbers
 without rerunning the full experiments:
 
 ```bash
-python3 code/figure2_block_sweep.py       # Fig 2 — block sweep curves
-python3 code/figure3_equal_budget.py      # Fig 3 — equal budget curves
-python3 code/fig1_hparam_sensitivity.py   # Fig 1 — heatmaps (Appendix C)
+python3 code/fig3_block_sweep.py       # Fig 3 — block sweep curves
+python3 code/fig4_equal_budget.py      # Fig 4 — equal budget curves
+python3 code/fig2_hparam_sensitivity.py   # Fig 2 — heatmaps
 ```
 
 Each script saves both a vector PDF and a 300 DPI PNG to the working directory.
@@ -251,12 +248,12 @@ Each script saves both a vector PDF and a 300 DPI PNG to the working directory.
 Supplementary evidence demonstrating that:
 
 - Sequential B=1 training saturates one CPU core
-- Block-parallel B=4 training saturates all 4 Kaggle free-tier CPU cores
-- Observed wall-clock speedup: 4.59×
+- Block-parallel B=2 training saturates 2 Kaggle free-tier CPU cores
+- Observed wall-clock speedup: 3.32×
 
 See:
 - `code/cpu_usage.py`
-- `results/cpu_usage_images/`
+- `fig4_cpu_utilization.pn`
 
 ---
 
