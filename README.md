@@ -44,34 +44,36 @@ supplemental/
 ├── requirements.txt
 │
 ├── code/
-│   ├── block_parallel_gbm_kaggle.py              # Core model implementation
-│   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
-│   ├── ieee_experiments.py                # IEEE-CIS experiments
-│   ├── santander_multiseed.py             # Multi-seed stability analysis
-│   ├── fig3_block_sweep.py             # Figure 3 generation
-│   ├── fig4_equal_budget.py            # Figure 4 generation
-│   ├── fig2_hparam_sensitivity.py         # Figure 2 generation
-│   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
 │   ├── ablation_covertype.py              # Covertype - ablation
-│   ├── estimating_overhead.py            # estimating overhead time across datasets used
-│   └── additional_experiments.py           
+│   ├── additional_experiments.py          # experiments related to xgboost and lightgbm
+│   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
+│   ├── block_parallel_gbm_kaggle.py       # Core model implementation
+│   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
+│   ├── equal_budget_covertype.py          # equal budget - Covertype
+│   ├── fig2_hparam_sensitivity.py         # Figure 2 generation
+│   ├── fig3_block_sweep.py                # Figure 3 generation
+│   ├── fig4_equal_budget.py               # Figure 4 generation
+│   ├── ieee_experiments.py                # IEEE-CIS experiments
+│   ├── measure_overhead.py                # estimating overhead time across datasets used
+│   └── santander_multiseed.py             # Multi-seed stability analysis           
 │
 └── results/
-    ├── fig4_cpu_utilization.png
-    ├── ablation_santander.csv
-    ├── block_sweep_santander.csv
-    ├── equal_budget_santander.csv
-    ├── santander_multiseed_summary.csv
-    ├── ablation_covertype.csv
-    ├── block_sweep_covertype.csv
-    ├── equal_budget_covertype.csv
-    ├── hparam_sensitivity_covertype.csv
     ├── ablation_adult.csv
+    ├── ablation_covertype.csv
+    ├── ablation_santander.csv
+    ├── equal_budget_santander.csv
     ├── block_sweep_adult.csv
+    ├── block_sweep_covertype.csv
+    ├── block_sweep_santander.csv
+    ├── equal_budget_covertype.csv
+    ├── equal_budget_santander.csv
+    ├── fig4_cpu_utilization.png
+    ├── hparam_sensitivity_covertype.csv
+    ├── ieee_ablation.csv
+    ├── ieee_block_sweep.csv
+    ├── ieee_equal_budget.csv
     ├── overhead_measurements.csv
-    ├── ablation_ieee_cis.csv
-    ├── block_sweep_ieee_cis.csv
-    └── equal_budget_ieee_cis.csv
+    └── santander_multiseed.csv
 ```
 
 ---
