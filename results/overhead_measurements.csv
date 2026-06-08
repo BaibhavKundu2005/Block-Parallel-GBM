@@ -1,0 +1,5 @@
+Dataset,n_samples,n_features,tau_tree_col10_mean,tau_tree_col10_std,tau_tree_col05_mean,tau_tree_col05_std,tau_block_B2_mean,tau_block_B2_std,implied_overhead,rho
+Santander,200000,200,27.5075,0.0448,13.8276,0.1989,14.3039,0.5097,0.4763,0.0173
+Covertype,100000,54,0.3511,0.006,0.1911,0.0305,0.3322,0.0141,0.1411,0.4019
+UCI_Adult,32561,14,0.0519,0.0005,0.0311,0.0055,0.151,0.0084,0.1199,2.3088
+IEEE_CIS,200000,392,3.7938,0.0184,1.9672,0.0482,2.2685,0.0854,0.3013,0.0794
