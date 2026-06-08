@@ -52,7 +52,8 @@ supplemental/
 │   ├── fig4_equal_budget.py            # Figure 4 generation
 │   ├── fig2_hparam_sensitivity.py         # Figure 2 generation
 │   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
-    ├── ablation_covertype.py              # Covertype - ablation
+│   ├── ablation_covertype.py              # Covertype - ablation
+│   ├── estimating_overhead.py            # estimating overhead time across datasets used
 │   └── additional_experiments.py           
 │
 └── results/
@@ -67,6 +68,7 @@ supplemental/
     ├── hparam_sensitivity_covertype.csv
     ├── ablation_adult.csv
     ├── block_sweep_adult.csv
+    ├── overhead_measurements.csv
     ├── ablation_ieee_cis.csv
     ├── block_sweep_ieee_cis.csv
     └── equal_budget_ieee_cis.csv
