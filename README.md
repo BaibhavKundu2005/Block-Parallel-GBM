@@ -48,7 +48,8 @@ supplemental/
 │   ├── additional_experiments.py          # experiments related to xgboost and lightgbm
 │   ├── block_parallel_gbm_experiments.py  # Santander + Covertype + Adult
 │   ├── block_parallel_gbm_kaggle.py       # Core model implementation
-│   ├── cpu_usage.py                       # Show CPU usage during Baseline and Block-Parallel Training
+│   ├── cpu_usage_detailed.py              # Detailed usage of CPU during training along with PIDs and plots
+│   ├── cpu_usage.py                       # Show overview of CPU usage during Baseline and Block-Parallel Training
 │   ├── equal_budget_covertype.py          # equal budget - Covertype
 │   ├── fig2_hparam_sensitivity.py         # Figure 2 generation
 │   ├── fig3_block_sweep.py                # Figure 3 generation
@@ -68,6 +69,8 @@ supplemental/
     ├── equal_budget_covertype.csv
     ├── equal_budget_santander.csv
     ├── fig4_cpu_utilization.png
+    ├── fig4a_per_process.png
+    ├── fig4b_aggregate.png
     ├── hparam_sensitivity_covertype.csv
     ├── ieee_ablation.csv
     ├── ieee_block_sweep.csv
