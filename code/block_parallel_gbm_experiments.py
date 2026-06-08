@@ -806,6 +806,10 @@ if __name__ == "__main__":
 
     # Results from the previous interrupted run.
     # These 4 configs are restored instantly — only b3 and b4 will train.
+    # Optional stub restoration utilities are included only for:
+    #- interrupted-run recovery,
+    #- developer convenience,
+    #- rapid plotting iteration.
     PRECOMPUTED = {
         "baseline":   {"total_time": 9528.1, "val_auc_final": 0.80692, "n_trees": 400},
         "col_only":   {"total_time": 4743.7, "val_auc_final": 0.80806, "n_trees": 400},
@@ -813,4 +817,4 @@ if __name__ == "__main__":
         "b2":         {"total_time": 2452.5, "val_auc_final": 0.77434, "n_trees": 400},
     }
 
-    run_all(SANTANDER_PATH, n_estimators=N_ESTIMATORS, precomputed=None)
+    run_all(SANTANDER_PATH, n_estimators=N_ESTIMATORS, precomputed=None) # precomputed = None trains everything from scratch, no stubs are used.
