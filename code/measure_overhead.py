@@ -37,7 +37,7 @@ from sklearn.preprocessing import LabelEncoder
 # ─────────────────────────────────────────────
 
 # Number of timing repetitions to average over for stability
-N_TIMING_REPS_TREE  = 10   # single-tree fits averaged
+N_TIMING_REPS_TREE  = 5   # single-tree fits averaged
 N_TIMING_REPS_BLOCK = 10   # parallel block fits averaged
 
 # Shared hyperparameters (must match paper)
