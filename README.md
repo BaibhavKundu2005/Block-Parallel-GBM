@@ -56,12 +56,15 @@ supplemental/
 │   ├── fig4_equal_budget.py               # Figure 4 generation
 │   ├── ieee_experiments.py                # IEEE-CIS experiments
 │   ├── measure_overhead.py                # estimating overhead time across datasets used
-│   └── santander_multiseed.py             # Multi-seed stability analysis           
+│   ├── santander_multiseed.py             # Multi-seed stability analysis
+│   └── verify_alpha_integrated.py         # To check convergence behaviour           
 │
 └── results/
     ├── ablation_adult.csv
     ├── ablation_covertype.csv
     ├── ablation_santander.csv
+    ├── alpha_records_detailed.csv
+    ├── alpha_verification.csv
     ├── equal_budget_santander.csv
     ├── block_sweep_adult.csv
     ├── block_sweep_covertype.csv
