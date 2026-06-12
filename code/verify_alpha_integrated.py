@@ -30,7 +30,8 @@ from sklearn.metrics import roc_auc_score
 from joblib import Parallel, delayed
 
 # ── Import from your repo ──
-sys.path.append("/kaggle/input/datasets/baibhavkundu/blockpgbm")
+# Download "block_parallel_gbm_kaggle.py" from this repository and upload it as a dataset in kaggle, then replace the path"
+sys.path.append("/kaggle/input/datasets/.../blockpgbm")
 from block_parallel_gbm_kaggle import BlockParallelGBM, fit_single_tree, compute_residuals, sigmoid
 # Adjust the import path/module name to match your repo structure
 
