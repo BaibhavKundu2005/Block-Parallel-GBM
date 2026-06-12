@@ -189,7 +189,7 @@ def preflight_profiler(X_tr, y_tr, n_trees=3):
 
     If rho >= 1.0:
         parallelism overhead dominates useful work
-        → abort expensive experiment runs
+        → Low chances of improvement.
     """
 
     print(f"\n{'='*65}")
@@ -223,7 +223,7 @@ def preflight_profiler(X_tr, y_tr, n_trees=3):
 
     tau_tree = np.mean(times)
 
-    # Conservative fixed estimate for process-launch overhead
+    # Experimentally fixed estimate for process-launch overhead (Section 6.2 in main paper)
     tau_overhead = 0.3
 
     rho = tau_overhead / tau_tree
