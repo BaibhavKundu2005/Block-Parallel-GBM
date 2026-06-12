@@ -19,7 +19,7 @@ from joblib import Parallel, delayed
 # ============================================================
 # You must download the "block_parallel_gbm_kaggle.py" notebook and upload it as a dataset in Kaggle, replace the path accordingly.
 import sys
-sys.path.append("/kaggle/input/datasets/baibhavkundu/blockpgbm")
+sys.path.append("/kaggle/input/datasets/.../blockpgbm")
 
 # If block_parallel_gbm_kaggle.py is uploaded directly
 from block_parallel_gbm_kaggle import BlockParallelGBM
