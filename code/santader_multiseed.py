@@ -126,7 +126,7 @@ def preflight_profiler(
 
     tau_tree = np.mean(times)
 
-    # Conservative fixed estimate for Kaggle free-tier CPUs
+    # Experimental estimate for Kaggle free-tier CPUs (Section 6.2 in main paper)
     tau_overhead = 0.3
 
     rho = tau_overhead / tau_tree
