@@ -3,8 +3,8 @@ Additional Experiments
 ======================
 Part 1 — XGBoost / LightGBM comparison on Santander
     Fits XGBoost and LightGBM with comparable settings, records per-round
-    AUC and cumulative time, and plots alongside the precomputed Santander
-    baseline and b2_live results from logs.
+    AUC and cumulative time, and plots alongside the freshly fit Santander
+    baseline and b2_live results.
 
     Outputs:
         xgb_lgbm_vs_block_trees.png   — AUC vs tree count
@@ -28,14 +28,14 @@ Part 2 — Covertype hyperparameter sensitivity
 Workflow:
     1. Load Santander data (for XGB/LGB comparison)
     2. Fit XGBoost and LightGBM with eval callbacks
-    3. Plot Part 1 figures using log data + freshly timed XGB/LGB
+    3. Plot Part 1 figures using freshly timed Baeline/B=2/XGB/LGB
     4. Load and prepare Covertype
     5. Run hyperparameter grid (9 pairs x 2 models = 18 fits)
     6. Run block sweep at default setting (4 fits)
     7. Plot all Part 2 figures
 
 Runtime estimate:
-    Part 1: ~5-10 min (XGBoost + LightGBM on Santander)
+    Part 1: ~5 hrs (Baeline + B=2 + XGBoost + LightGBM on Santander)
     Part 2: ~20-40 min (Covertype is fast at 100k x 54 features)
 """
 
@@ -240,7 +240,7 @@ def preflight_profiler(
 
     tau_tree = np.mean(times)
 
-    # Conservative process-launch estimate for Kaggle CPUs
+    # Experimental process-launch estimate for Kaggle CPUs (Section 6.2 in main paper)
     tau_overhead = 0.3
 
     rho = tau_overhead / tau_tree
@@ -271,36 +271,9 @@ def preflight_profiler(
 #  PART 1 — XGBoost / LightGBM comparison on Santander
 # ═════════════════════════════════════════════════════════════════
 
-# Santander results from logs — precomputed, no retraining needed
-# baseline: 400 trees, logged every 20 blocks
-SANT_BASELINE_TREES = [1,21,41,61,81,101,121,141,161,181,201,
-                        221,241,261,281,301,321,341,361,381,400]
-SANT_BASELINE_AUCS  = [0.60457,0.66146,0.68086,0.70135,0.71587,0.73117,
-                        0.74291,0.75279,0.76090,0.76780,0.77329,0.77800,
-                        0.78219,0.78651,0.78990,0.79346,0.79670,0.79949,
-                        0.80212,0.80467,0.80692]
-SANT_BASELINE_TIME  = 9528.1
-
-# b2_live: logged every 20 blocks, 862 blocks total
-SANT_B2_LIVE_BLOCKS = [1,21,41,61,81,101,121,141,161,181,201,221,241,
-                        261,281,301,321,341,361,381,401,421,441,461,481,
-                        501,521,541,561,581,601,621,641,661,681,701,721,
-                        741,761,781,801,821,841,861]
-SANT_B2_LIVE_AUCS   = [0.62788,0.67587,0.68558,0.70198,0.71708,0.73175,
-                        0.74378,0.75404,0.76204,0.76943,0.77457,0.77947,
-                        0.78362,0.78763,0.79122,0.79431,0.79771,0.80049,
-                        0.80329,0.80576,0.80824,0.81040,0.81254,0.81455,
-                        0.81635,0.81845,0.82017,0.82187,0.82342,0.82487,
-                        0.82635,0.82767,0.82914,0.83037,0.83163,0.83276,
-                        0.83403,0.83512,0.83621,0.83715,0.83819,0.83920,
-                        0.84016,0.84105]
-SANT_B2_LIVE_TREES  = [b * 2 for b in SANT_B2_LIVE_BLOCKS]
-SANT_B2_LIVE_TIME   = 9501.3
-
-
 def fit_xgb_lgbm_santander(santander_path):
     """
-    Fit XGBoost and LightGBM on Santander with matched hyperparameters.
+    Fit Baseline, B=2, XGBoost and LightGBM on Santander with matched hyperparameters.
     Records per-round val AUC and cumulative wall-clock time using
     custom callbacks.
     Returns dicts with keys: val_auc, trees, cumulative_times, total_time
@@ -309,7 +282,7 @@ def fit_xgb_lgbm_santander(santander_path):
     import lightgbm as lgb
 
     print("=" * 65)
-    print("PART 1: XGBoost / LightGBM — SANTANDER")
+    print("PART 1: Baseline/ B=2/ XGBoost / LightGBM — SANTANDER")
     print("=" * 65)
 
     print("\nLoading Santander...")
@@ -319,11 +292,60 @@ def fit_xgb_lgbm_santander(santander_path):
     X_tr, X_val, y_tr, y_val = train_test_split(
         X, y, test_size=0.2, random_state=42, stratify=y)
     print(f"  Train: {X_tr.shape} | Val: {X_val.shape}")
-    preflight_profiler(X_tr, y_tr, max_features=1.0, max_depth=4, min_samples_leaf=20, label="Santander XGB/LGB comparison")
+    preflight_profiler(X_tr, y_tr, max_features=1.0, max_depth=4, min_samples_leaf=20, label="Santander Baseline/B=2/XGB/LGB comparison")
 
     N_ROUNDS = 400
     LR       = 0.1
     DEPTH    = 4
+
+    print("\n--- Baseline GBM ---")
+
+    baseline = BlockParallelGBM(
+        n_estimators=400,
+        block_size=1,
+        learning_rate=0.1,
+        max_depth=4,
+        min_samples_leaf=20,
+        colsample=1.0,
+        auto_scale_lr=False,
+        n_jobs=1,
+        random_state=42,
+        verbose=True
+    )
+
+    baseline.fit(X_tr, y_tr, X_val, y_val)
+    baseline_budget = baseline.total_time
+
+    print(
+        f"Baseline done | time={baseline.total_time:.1f}s "
+        f"| best_auc={baseline.best_val_auc:.5f}"
+        f"\nBaseline budget = {baseline_budget:.1f}s"
+    )
+
+    print("\n--- BP-GBM (B=2) ---")
+
+    b2 = BlockParallelGBM(
+        n_estimators=999999,          # effectively unlimited
+        block_size=2,
+        learning_rate=0.1,
+        max_depth=4,
+        min_samples_leaf=20,
+        colsample=0.5,
+        auto_scale_lr=True,
+        n_jobs=-1,
+        random_state=42,
+        verbose=True,
+        time_limit_seconds=baseline_budget
+    )
+
+    b2.fit(X_tr, y_tr, X_val, y_val)
+
+    print(
+        f"BP-GBM done | trees={len(b2.trees_)} "
+        f"| time={b2.total_time:.1f}s "
+        f"| best_auc={b2.best_val_auc:.5f}"
+        f"BP-GBM built {len(b2.trees_)} trees"
+    )
 
     # ── XGBoost ──
     print(f"\n--- XGBoost | n_rounds={N_ROUNDS} | lr={LR} | max_depth={DEPTH} ---")
@@ -424,100 +446,180 @@ def fit_xgb_lgbm_santander(santander_path):
         "total_time":       lgb_total,
     }
 
-    return xgb_results, lgb_results
+    baseline_results = {
+        "val_auc": baseline.val_auc_,
+        "trees": [
+            baseline.block_size * (i + 1)
+            for i in range(len(baseline.val_auc_))
+        ],
+        "cumulative_times": baseline.cumulative_times_,
+        "total_time": baseline.total_time,
+    }
+
+    b2_results = {
+        "val_auc": b2.val_auc_,
+        "trees": [
+            b2.block_size * (i + 1)
+            for i in range(len(b2.val_auc_))
+        ],
+        "cumulative_times": b2.cumulative_times_,
+        "total_time": b2.total_time,
+    }
+
+    return baseline_results, b2_results, xgb_results, lgb_results
 
 
-def plot_xgb_lgbm_comparison(xgb_res, lgb_res):
+def plot_xgb_lgbm_comparison(
+    baseline_res,
+    b2_res,
+    xgb_res,
+    lgb_res
+):
     """
     Two plots:
-      1. AUC vs tree count  (equal tree count comparison)
-      2. AUC vs wall-clock time  (equal budget comparison)
+      1. AUC vs tree count
+      2. AUC vs wall-clock time
 
-    Baseline and b2_live taken from Santander logs.
-    XGBoost and LightGBM from fresh fits above.
+    All results come from fresh training runs.
     """
 
-    # Interpolate baseline and b2_live to per-tree resolution for plot 1
-    baseline_auc_interp = np.interp(
-        np.arange(1, 401),
-        SANT_BASELINE_TREES,
-        SANT_BASELINE_AUCS
-    )
-    b2_live_auc_interp = np.interp(
-        np.arange(2, 1725, 2),
-        SANT_B2_LIVE_TREES,
-        SANT_B2_LIVE_AUCS
-    )
-    b2_live_tree_axis = np.arange(2, 1725, 2)
+    # ─────────────────────────────────────────────
+    # Plot 1: AUC vs tree count
+    # ─────────────────────────────────────────────
 
-    # Cumulative times for baseline (uniform from log total)
-    baseline_cum_times = np.linspace(0, SANT_BASELINE_TIME, 400)
-    b2_live_cum_times  = np.linspace(0, SANT_B2_LIVE_TIME, len(SANT_B2_LIVE_BLOCKS))
-    b2_live_time_aucs  = SANT_B2_LIVE_AUCS
-
-    # ── Plot 1: AUC vs tree count ──
     fig, ax = plt.subplots(figsize=(11, 6))
 
-    ax.plot(np.arange(1, 401), baseline_auc_interp,
-            color="blue", linewidth=2, label="Baseline GBM (B=1, col=1.0)")
-    ax.plot(b2_live_tree_axis, b2_live_auc_interp,
-            color="red", linewidth=2, linestyle="--",
-            label="Block B=2, col=0.5 (our method)")
-    ax.plot(xgb_res["trees"], xgb_res["val_auc"],
-            color="green", linewidth=2, linestyle="-.",
-            label="XGBoost (within-tree parallel)")
-    ax.plot(lgb_res["trees"], lgb_res["val_auc"],
-            color="orange", linewidth=2, linestyle=":",
-            label="LightGBM (within-tree parallel)")
+    ax.plot(
+        baseline_res["trees"],
+        baseline_res["val_auc"],
+        color="blue",
+        linewidth=2,
+        label="Baseline GBM (B=1, col=1.0)"
+    )
 
-    ax.axvline(x=400, color="gray", linestyle=":", alpha=0.5,
-               label="400 trees (baseline budget)")
-    ax.set_xlabel("Number of trees", fontsize=12)
+    ax.plot(
+        b2_res["trees"],
+        b2_res["val_auc"],
+        color="red",
+        linewidth=2,
+        linestyle="--",
+        label=f"Block B=2, col=0.5 ({len(b2_res['trees'])} trees)"
+    )
+
+    ax.plot(
+        xgb_res["trees"],
+        xgb_res["val_auc"],
+        color="green",
+        linewidth=2,
+        linestyle="-.",
+        label="XGBoost"
+    )
+
+    ax.plot(
+        lgb_res["trees"],
+        lgb_res["val_auc"],
+        color="orange",
+        linewidth=2,
+        linestyle=":",
+        label="LightGBM"
+    )
+
+    ax.axvline(
+        x=len(baseline_res["trees"]),
+        color="gray",
+        linestyle=":",
+        alpha=0.5,
+        label=f"{len(baseline_res['trees'])} trees (baseline)"
+    )
+
+    ax.set_xlabel("Number of Trees", fontsize=12)
     ax.set_ylabel("Validation AUC", fontsize=12)
-    ax.set_title("AUC vs Tree Count — Santander\n"
-                 "(XGBoost/LightGBM address within-tree parallelism; "
-                 "our method addresses across-iteration parallelism)",
-                 fontsize=11, fontweight="bold")
+
+    ax.set_title(
+        "AUC vs Tree Count — Santander",
+        fontsize=11,
+        fontweight="bold"
+    )
+
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)
+
     plt.tight_layout()
+
     p = f"{OUT_DIR}xgb_lgbm_vs_block_trees.png"
     plt.savefig(p, dpi=150, bbox_inches="tight")
     plt.close()
+
     print(f"Saved: {p}")
 
-    # ── Plot 2: AUC vs wall-clock time ──
+    # ─────────────────────────────────────────────
+    # Plot 2: AUC vs wall-clock time
+    # ─────────────────────────────────────────────
+
     fig, ax = plt.subplots(figsize=(11, 6))
 
-    ax.plot(baseline_cum_times, baseline_auc_interp,
-            color="blue", linewidth=2, label="Baseline GBM (B=1, col=1.0)")
-    ax.plot(np.linspace(0, SANT_B2_LIVE_TIME, len(b2_live_time_aucs)),
-            b2_live_time_aucs,
-            color="red", linewidth=2, linestyle="--",
-            label=f"Block B=2, col=0.5 — {len(SANT_B2_LIVE_BLOCKS)*2} trees")
-    ax.plot(xgb_res["cumulative_times"], xgb_res["val_auc"],
-            color="green", linewidth=2, linestyle="-.",
-            label=f"XGBoost — {len(xgb_res['trees'])} trees")
-    ax.plot(lgb_res["cumulative_times"], lgb_res["val_auc"],
-            color="orange", linewidth=2, linestyle=":",
-            label=f"LightGBM — {len(lgb_res['trees'])} trees")
+    ax.plot(
+        baseline_res["cumulative_times"],
+        baseline_res["val_auc"],
+        color="blue",
+        linewidth=2,
+        label=f"Baseline GBM ({len(baseline_res['trees'])} trees)"
+    )
 
-    ax.axhline(y=0.80692, color="blue", linestyle=":", alpha=0.4,
-               label="Baseline final AUC = 0.80692")
-    ax.set_xlabel("Wall-clock time (s)", fontsize=12)
+    ax.plot(
+        b2_res["cumulative_times"],
+        b2_res["val_auc"],
+        color="red",
+        linewidth=2,
+        linestyle="--",
+        label=f"BP-GBM B=2 ({len(b2_res['trees'])} trees)"
+    )
+
+    ax.plot(
+        xgb_res["cumulative_times"],
+        xgb_res["val_auc"],
+        color="green",
+        linewidth=2,
+        linestyle="-.",
+        label=f"XGBoost ({len(xgb_res['trees'])} trees)"
+    )
+
+    ax.plot(
+        lgb_res["cumulative_times"],
+        lgb_res["val_auc"],
+        color="orange",
+        linewidth=2,
+        linestyle=":",
+        label=f"LightGBM ({len(lgb_res['trees'])} trees)"
+    )
+
+    ax.axhline(
+        y=max(baseline_res["val_auc"]),
+        color="blue",
+        linestyle=":",
+        alpha=0.4,
+        label=f"Baseline best AUC = {max(baseline_res['val_auc']):.5f}"
+    )
+
+    ax.set_xlabel("Wall-clock Time (s)", fontsize=12)
     ax.set_ylabel("Validation AUC", fontsize=12)
-    ax.set_title("AUC vs Wall-Clock Time — Santander\n"
-                 "Note: XGBoost/LightGBM finish in far less time at 400 trees; "
-                 "block method uses remaining time to build more trees",
-                 fontsize=11, fontweight="bold")
+
+    ax.set_title(
+        "AUC vs Wall-Clock Time — Santander",
+        fontsize=11,
+        fontweight="bold"
+    )
+
     ax.legend(fontsize=10)
     ax.grid(True, alpha=0.3)
+
     plt.tight_layout()
+
     p = f"{OUT_DIR}xgb_lgbm_vs_block_time.png"
     plt.savefig(p, dpi=150, bbox_inches="tight")
     plt.close()
-    print(f"Saved: {p}")
 
+    print(f"Saved: {p}")
 
 # ═════════════════════════════════════════════════════════════════
 #  PART 2 — Covertype hyperparameter sensitivity
@@ -770,8 +872,8 @@ def run_all(santander_path, n_estimators_covertype=200):
     """
 
     # ── Part 1: XGBoost / LightGBM on Santander ──
-    xgb_res, lgb_res = fit_xgb_lgbm_santander(santander_path)
-    plot_xgb_lgbm_comparison(xgb_res, lgb_res)
+    baseline_res, b2_res, xgb_res, lgb_res = fit_xgb_lgbm_santander(santander_path)
+    plot_xgb_lgbm_comparison(baseline_res, b2_res, xgb_res, lgb_res)
 
     # ── Part 2: Covertype ──
     X_tr, X_val, y_tr, y_val = load_covertype(n_samples=100_000)
@@ -807,5 +909,5 @@ def run_all(santander_path, n_estimators_covertype=200):
 # ═════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    SANTANDER_PATH = "/kaggle/input/santander-customer-transaction-prediction/train.csv"
+    SANTANDER_PATH = "/kaggle/input/competitions/santander-customer-transaction-prediction/train.csv" # Use "Add Input" option on sidebar and search santander customer transaction prediction (~8751 teams)
     run_all(SANTANDER_PATH, n_estimators_covertype=200)
