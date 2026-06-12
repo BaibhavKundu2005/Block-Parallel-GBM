@@ -648,7 +648,7 @@ def profile_tree_cost(X_tr, y_tr, n_profile=3):
     Prints a go/no-go recommendation before any experiment starts.
     """
     SEP = "=" * 65
-    TAU_OVERHEAD = 0.3   # known joblib overhead on 4 cores
+    TAU_OVERHEAD = 0.3   # exoerimentally chosen joblib overhead on 4 cores
 
     print("")
     print(SEP)
